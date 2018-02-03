@@ -10,6 +10,8 @@ module Simpler
         @params = {}
         @controller = controller
         @action = action
+
+        self.class.add_action(action)
       end
 
       def match?(method, path)
@@ -17,6 +19,15 @@ module Simpler
       end
 
       private
+
+      def self.add_action(action)
+          @actions_list ||= []
+          @actions_list.push(action)
+      end
+
+      def self.actions_list
+          @actions_list.uniq
+      end
 
       def compare_path(path)
         conroller_path_parts = path_parts(@path)
@@ -43,7 +54,7 @@ module Simpler
       end
 
       def is_action?(action)
-        action.to_i.zero?
+        self.class.actions_list.include?(action)
       end
 
       def is_not_action?(action)
@@ -57,7 +68,7 @@ module Simpler
       def add_param(param, value)
         param = param.split(':')[1].to_sym
 
-        @params[param] = value.to_i
+        @params[param] = value.to_i == 0 ? value : value.to_i
       end
 
     end
