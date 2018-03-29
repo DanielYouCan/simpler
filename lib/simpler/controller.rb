@@ -17,6 +17,7 @@ module Simpler
 
       set_default_headers
       send(action)
+      select_format
       write_response
 
       @response.finish
@@ -26,6 +27,14 @@ module Simpler
 
     def extract_name
       self.class.name.match('(?<name>.+)Controller')[:name].downcase
+    end
+
+    def status(code)
+      @response.status = code
+    end
+
+    def headers
+      @response.headers
     end
 
     def set_default_headers
@@ -39,7 +48,12 @@ module Simpler
     end
 
     def render_body
-      View.new(@request.env).render(binding)
+      type = View.select_type(@request.env)
+      type.new(@request.env).render(binding)
+    end
+
+    def set_params
+      @request.params.update(@request.env['simpler.params'])
     end
 
     def params
@@ -50,5 +64,16 @@ module Simpler
       @request.env['simpler.template'] = template
     end
 
+    def select_format
+      template = @request.env['simpler.template']
+
+      if template.is_a? Hash
+        format = template.keys.first
+        case format
+        when :plain
+          @response['Content-Type'] = "text/plain"
+        end
+      end
+    end
   end
 end

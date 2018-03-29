@@ -1,38 +1,13 @@
-require 'erb'
+require_relative 'view_types/html_type'
+require_relative 'view_types/plain_type'
 
 module Simpler
   class View
 
-    VIEW_BASE_PATH = 'app/views'.freeze
+    def self.select_type(env)
+      plain_type = env['simpler.template'].keys.first if env['simpler.template'].is_a? Hash
 
-    def initialize(env)
-      @env = env
-    end
-
-    def render(binding)
-      template = File.read(template_path)
-
-      ERB.new(template).result(binding)
-    end
-
-    private
-
-    def controller
-      @env['simpler.controller']
-    end
-
-    def action
-      @env['simpler.action']
-    end
-
-    def template
-      @env['simpler.template']
-    end
-
-    def template_path
-      path = template || [controller.name, action].join('/')
-
-      Simpler.root.join(VIEW_BASE_PATH, "#{path}.html.erb")
+      plain_type.nil? ? HtmlType : PlainType
     end
 
   end

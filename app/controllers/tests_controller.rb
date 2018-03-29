@@ -1,11 +1,15 @@
 class TestsController < Simpler::Controller
 
   def index
-    @time = Time.now
+    render 'index'
   end
 
   def create
 
+  end
+
+  def show
+    @test = set_params
   end
 
 end
